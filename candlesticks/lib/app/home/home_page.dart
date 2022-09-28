@@ -83,13 +83,11 @@ class _HomePageState extends State<HomePage> {
               child: Container(
                 height: MediaQuery.of(context).size.height,
                 width: MediaQuery.of(context).size.width,
-                color: Colors.grey[300],
+                color: Colors.black87,
                 child: CustomPaint(
                   size: const Size(500, 500),
                   painter: CandlestickPainter(
                     data: _data!,
-                    minValue: minLowValue,
-                    maxValue: maxHighValue,
                     offset: updateOffset + currentOffset,
                     scale: scaleDelta,
                   ),
@@ -110,3 +108,12 @@ class _HomePageState extends State<HomePage> {
     );
   }
 }
+
+
+// TODO LIST
+// - Exibir texto com os valores de zoom e deslocamento
+// - Exibir legenda pros eixos(fazer do eixo x na diagonal)
+// - Adicionar o zoom no eixo Y(o ajuste do eixo Y também deve ser feito no deslocamento)
+// - Melhorar o zoom no ponto onde foi dado zoom
+// - Limitar o deslocamento no início e fim do gráfico
+// - Limitar o zoom out pra ficar pelo menos todos os pontos na tela

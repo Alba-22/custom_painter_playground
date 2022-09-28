@@ -1,4 +1,6 @@
 // ignore_for_file: public_member_api_docs, sort_constructors_first
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 
 import 'package:candlesticks/app/home/models/ohcl_model.dart';
@@ -6,34 +8,49 @@ import 'package:candlesticks/app/home/models/ohcl_model.dart';
 class CandlestickPainter extends CustomPainter {
   final Offset offset;
   final List<OhlcModel> data;
-  final double minValue;
-  final double maxValue;
   final double scale;
 
   CandlestickPainter({
     required this.offset,
     required this.data,
-    required this.minValue,
-    required this.maxValue,
     required this.scale,
   });
 
   @override
   void paint(Canvas canvas, Size size) {
-    final max = data.length;
-    final candleWidth = (size.width / max) * scale;
+    final maxX = data.length;
+    final candleWidth = (size.width / maxX) * scale;
 
-    for (int i = 0; i < max; i++) {
+    double minY = double.infinity;
+    double maxY = -double.infinity;
+
+    for (int i = 0; i < maxX; i++) {
+      final xPositionOfCandleInPixels = (candleWidth * (i + 0.5) + (offset.dx)).toDouble();
+      if (xPositionOfCandleInPixels < 0 || xPositionOfCandleInPixels > size.width) {
+        continue;
+      }
+      minY = min(minY, data[i].lowPrice);
+      maxY = max(maxY, data[i].highPrice);
+    }
+
+    final deltaY = (maxY - minY) * 1.1;
+
+    final yAverage = (maxY + minY) / 2;
+
+    minY = yAverage - (deltaY / 2);
+
+    for (int i = 0; i < maxX; i++) {
       final info = data[i];
-      final deltaY = maxValue - minValue;
 
-      final candleAverage = (info.closePrice + info.openPrice) / 2 - minValue;
+      final xPositionOfCandleInPixels = (candleWidth * (i + 0.5) + (offset.dx)).toDouble();
+
+      final candleAverage = (info.closePrice + info.openPrice) / 2 - minY;
       final candleHeightInPixels = (1 - (candleAverage / deltaY)) * size.height;
-      final centerOfCandle = Offset((candleWidth * (i + 0.5) + (offset.dx)).toDouble(), candleHeightInPixels);
+      final centerOfCandle = Offset(xPositionOfCandleInPixels, candleHeightInPixels);
 
-      final stickAverage = (info.highPrice + info.lowPrice) / 2 - minValue;
+      final stickAverage = (info.highPrice + info.lowPrice) / 2 - minY;
       final stickHeightInPixels = (1 - (stickAverage / deltaY)) * size.height;
-      final centerOfStick = Offset((candleWidth * (i + 0.5) + (offset.dx)).toDouble(), stickHeightInPixels);
+      final centerOfStick = Offset(xPositionOfCandleInPixels, stickHeightInPixels);
 
       final color = info.closePrice - info.openPrice > 0 ? Colors.green : Colors.red;
 
